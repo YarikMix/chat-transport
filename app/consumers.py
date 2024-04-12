@@ -6,7 +6,6 @@ from asgiref.sync import async_to_sync
 
 from app.utils import text_to_bits
 
-from kafka import KafkaProducer, KafkaConsumer
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -26,29 +25,6 @@ class ChatConsumer(WebsocketConsumer):
             "type": "connection_established",
             "message": "You are now connected"
         }))
-
-    def getKafka(self):
-        print("getKafka")
-        consumer = KafkaConsumer('testnum',
-                                 bootstrap_servers=['localhost:29092'],
-                                 group_id='test',
-                                 auto_offset_reset='earliest')
-        for msg in consumer:
-            res_str = msg.value.decode("utf-8")
-            print("Text:", res_str)
-
-    def sendKafka(self):
-        print("sendKafka")
-        my_producer = KafkaProducer(
-            bootstrap_servers=['localhost:29092'],
-            value_serializer=lambda x: json.dumps(x).encode('utf-8')
-        )
-
-        message = "1"
-        while message != "0":
-            message = input("Type your message: ")
-            my_producer.send("testnum", value=message)
-            self.getKafka()
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -70,7 +46,6 @@ class ChatConsumer(WebsocketConsumer):
                 })
                 print(r.status_code)
                 print(r.text)
-                self.sendKafka(r.text)
                 f = a[i]
             else:
                 f += a[i]

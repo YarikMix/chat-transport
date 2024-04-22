@@ -27,9 +27,10 @@ class ChatConsumer(WebsocketConsumer):
         }))
 
     def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        print(text_data_json)
-        message = str(text_data_json)
+        print("receive")
+        data = json.loads(text_data)
+        print(data)
+        message = data["message"]
 
         print("receive")
         print(text_data)
@@ -39,58 +40,27 @@ class ChatConsumer(WebsocketConsumer):
         print(a)
         print(len(a))
 
-        acc = ""
-
         f = ""
         for i in range(len(a)):
             if i % (130 * 8) == 0 and i != 0:
-                print("Отправка сегментов")
-                r = requests.post('http://127.0.0.1:5000/Segments/Code', json={
+                print("Отправка сегмента")
+                requests.post('http://127.0.0.1:5000/Segments/Code', json={
+                    "time": data["time"],
+                    "user": data["user"],
                     "Segment": f
                 })
-                print(r.status_code)
-                data = json.loads(r.text)
-                print(data["segment"])
-                acc += data["segment"]
-                # sendKafka(data["segment"])
                 f = a[i]
             else:
                 f += a[i]
         else:
-            print("Отправка сегментов")
-            r = requests.post('http://127.0.0.1:5000/Segments/Code', json={
+            print("Отправка сегмента")
+            requests.post('http://127.0.0.1:5000/Segments/Code', json={
+                "time": data["time"],
+                "user": data["user"],
                 "Segment": f
             })
-            print(json.loads(r.text))
-            data = json.loads(r.text)
-            # sendKafka(data["segment"])
-            print(r.status_code)
-            print(data["segment"])
-            acc += data["segment"]
 
         print("END")
-
-
-        try:
-            print("Раскодированное сообщение")
-            print(text_from_bits(acc).replace('\'', "\""))
-
-            data = json.loads(text_from_bits(acc).replace('\'', "\""))
-            async_to_sync(self.channel_layer.group_send)(
-                self.room_group_name,
-                {
-                    "type": "chat_message",
-                    "data": data
-                }
-            )
-        except:
-            print("Ошибка при парсинге JSON")
-            async_to_sync(self.channel_layer.group_send)(
-                self.room_group_name,
-                {
-                    "type": "error_message"
-                }
-            )
 
     def chat_message(self, event):
         data = event["data"]

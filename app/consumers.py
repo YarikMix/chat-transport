@@ -32,7 +32,7 @@ class ChatConsumer(WebsocketConsumer):
 
         message = data["message"]
 
-        message_id = data["time"] + data["user"] # TODO: генерить уникальным
+        message_id = data["time"] # TODO: генерить уникальным
 
         print("receive")
         print("message: " + message)
@@ -65,6 +65,7 @@ class ChatConsumer(WebsocketConsumer):
             })
 
             print(resp.status_code)
+            print(resp.reason)
 
     def chat_message(self, event):
         data = {

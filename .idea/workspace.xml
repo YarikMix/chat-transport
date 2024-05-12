@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a594d0eb-acb6-45f5-967a-479a50d22755" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/react-chat-transport.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/react-chat-transport.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/queue.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/queue.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,6 +87,7 @@
       <workItem from="1714415206608" duration="267000" />
       <workItem from="1714476963636" duration="5417000" />
       <workItem from="1714485400414" duration="676000" />
+      <workItem from="1715525231705" duration="2067000" />
     </task>
     <servers />
   </component>

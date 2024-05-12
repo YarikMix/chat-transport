@@ -23,7 +23,7 @@ def getKafka(key="testnum"):
 
     res_str = []
 
-    message = consumer.poll(1.0)
+    message = consumer.poll(0.1)
 
     for records in message.values():
         for msg in records:

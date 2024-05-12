@@ -1,0 +1,6 @@
+Django
+djangorestframework
+channels==4.1.0
+daphne==4.1.0
+requests==2.31.0
+kafka-python @ git+https://github.com/dpkp/kafka-python.git@a6d0579d3cadd3826dd364b01bc12a2173139abc

@@ -4,8 +4,7 @@ import requests
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 
-from app.queue import sendKafka
-from app.utils import text_to_bits, text_from_bits
+from app.utils import text_to_bits
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -30,50 +29,55 @@ class ChatConsumer(WebsocketConsumer):
         print("receive")
         data = json.loads(text_data)
         print(data)
+
         message = data["message"]
 
+        message_id = data["time"] + data["user"] # TODO: генерить уникальным
+
         print("receive")
-        print(text_data)
-        print(message)
+        print("message: " + message)
+        print("message_id: " + message_id)
 
         a = text_to_bits(message)
-        print(a)
-        print(len(a))
 
-        f = ""
+        segments = []
+
+        acc = ""
         for i in range(len(a)):
             if i % (130 * 8) == 0 and i != 0:
-                print("Отправка сегмента")
-                requests.post('http://127.0.0.1:5000/Segments/Code', json={
-                    "time": data["time"],
-                    "user": data["user"],
-                    "Segment": f
-                })
-                f = a[i]
+                segments.append(acc)
+                acc = a[i]
             else:
-                f += a[i]
+                acc += a[i]
         else:
-            print("Отправка сегмента")
-            requests.post('http://127.0.0.1:5000/Segments/Code', json={
-                "time": data["time"],
-                "user": data["user"],
-                "Segment": f
-            })
+            segments.append(acc)
 
         print("END")
 
+        for i, segment in enumerate(segments):
+            print(f"Отправка сегмента №{i+1}")
+            resp = requests.post('http://127.0.0.1:5000/Segments/Code/', json={
+                "segment": segment,
+                "total_segments": len(segments),
+                "message_id": message_id,
+                "send_time": data["time"],
+                "username": data["user"]
+            })
+
+            print(resp.status_code)
+
     def chat_message(self, event):
-        data = event["data"]
+        data = {
+            "username": event["username"],
+            "send_time":  event["send_time"],
+            "message":  event["message"],
+            "error": event["error"]
+        }
+
         print("chat_message")
         print(data)
+
         self.send(text_data=json.dumps({
             "type": "chat",
             "data": data
-        }))
-
-    def error_message(self, event):
-        print("error_message")
-        self.send(text_data=json.dumps({
-            "type": "error",
-            "data": "Ошибка"
         }))

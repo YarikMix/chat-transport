@@ -5,13 +5,13 @@ from kafka import KafkaProducer, KafkaConsumer
 
 def sendKafka(message, key="testnum"):
     print("sendKafka")
+    print(message, key)
     my_producer = KafkaProducer(
         bootstrap_servers=['localhost:29092'],
         value_serializer=lambda x: dumps(x).encode('utf-8')
     )
 
     my_producer.send(key, value=message)
-    getKafka()
 
 
 def getKafka(key="testnum"):
@@ -20,6 +20,15 @@ def getKafka(key="testnum"):
                              bootstrap_servers=['localhost:29092'],
                              group_id='test',
                              auto_offset_reset='earliest')
-    for msg in consumer:
-        res_str = msg.value.decode("utf-8")
-        print("Text:", res_str)
+
+    res_str = []
+
+    message = consumer.poll(1.0)
+
+    for records in message.values():
+        for msg in records:
+            res_str.append(msg.value.decode("utf-8").strip('"'))
+
+    return res_str
+
+

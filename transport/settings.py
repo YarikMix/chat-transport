@@ -13,14 +13,12 @@ SECRET_KEY = 'django-insecure-drf)(qky7bih*s*f8$vxt-s42)n2&k-^=5t2_wuttu+8@a7hzi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    "channels",
-    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -1,0 +1,67 @@
+{
+	"info": {
+		"_postman_id": "7cc21fd5-2dc1-4fd9-b035-d320c4d6fb49",
+		"name": "Курсач",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33669280"
+	},
+	"item": [
+		{
+			"name": "transfer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Message_id\": \"1716560328837\",\r\n    \"Username\": \"asdfasd\",\r\n    \"Send_time\": \"1716560328831\",\r\n    \"Segment\": \"0110000101110011011001000110011001100001011100110110010001100110\",\r\n    \"Segment_number\": 0,\r\n    \"Total_segments\": 2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/transfer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"transfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "send",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user\": \"user\",\r\n    \"time\": \"1716560328865\",\r\n    \"message\": \"Hello world\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/send/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"send",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -4,5 +4,5 @@ from .views import *
 
 urlpatterns = [
     path('transfer', transfer),
-    path('send/', receive)
+    path('send/', send)
 ]

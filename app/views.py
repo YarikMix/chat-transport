@@ -1,5 +1,6 @@
 import threading
 import time
+from django.core.cache import cache
 
 import requests
 from rest_framework.decorators import api_view
@@ -7,12 +8,11 @@ from rest_framework.response import Response
 
 from app.queue import sendKafka, getKafka
 
-from kafka import KafkaConsumer
-
 from app.utils import text_from_bits, text_to_bits
 
 
 def send_to_ws(username, send_time, message, error=False):
+    print("send_to_ws")
     resp = requests.post('http://localhost:4000/receive/', json={
         "user": username,
         "time": send_time,
@@ -23,14 +23,14 @@ def send_to_ws(username, send_time, message, error=False):
 
 
 def pooling(username, send_time, message_id, segments_count):
-    print("ruuuun")
+    print("start pooling")
 
     prev = []
 
     while True:
         time.sleep(1)
 
-        segments = getKafka(message_id)
+        segments = cache.get(message_id)
         if len(prev) != len(segments):
             print("segments")
             print(segments)
@@ -43,6 +43,7 @@ def pooling(username, send_time, message_id, segments_count):
             if len(segments) != segments_count:
                 print("Error!")
                 send_to_ws(username, send_time, "", error=True)
+                cache.delete(message_id)
             else:
 
                 print("Success")
@@ -55,13 +56,37 @@ def pooling(username, send_time, message_id, segments_count):
                     send_to_ws(username, send_time, message)
                 except:
                     send_to_ws(username, send_time, "", error=True)
+                finally:
+                    cache.delete(message_id)
 
             break
+
+
+def assembling(message_id, segments_count, send_time, username):
+    print("Сборка сегментов сообщения с id" + message_id)
+
+    segments = getKafka(message_id)
+    if segments_count == len(segments):
+        for i, segment in enumerate(segments):
+            print(f"Отправка сегмента №{i + 1} на канальный уровень")
+            resp = requests.post('http://127.0.0.1:5000/Segments/Code/', json={
+                "segment": segment,
+                "total_segments": len(segments),
+                "segment_number": i,
+                "message_id": message_id,
+                "send_time": send_time,
+                "username": username
+            })
+
+            print(resp.status_code)
+
+            time.sleep(1)
 
 
 @api_view(["POST"])
 def transfer(request):
     print("transfer")
+    print("Ответка от канального уровня")
     print(request.data)
 
     message_id = request.data["Message_id"]
@@ -71,27 +96,28 @@ def transfer(request):
     username = request.data["Username"]
     send_time = request.data["Send_time"]
 
-    consumer = KafkaConsumer(bootstrap_servers=['localhost:29092'],
-                             group_id='test',
-                             auto_offset_reset='earliest')
+    if message_id in cache:
+        cached_message = cache.get(message_id)
+        cache.set(message_id, cached_message + [segment])
+    else:
+        cache.set(message_id, [segment])
+        threading.Thread(target=pooling, args=[username, send_time, message_id, segments_count]).start()
 
-    if message_id not in consumer.topics():
-        print("Start thread: " + message_id)
-        a = threading.Thread(target=pooling, args=[username, send_time, message_id, segments_count])
-        a.start()
-
-    sendKafka(segment, message_id)
+    print("Редис: ")
+    print(cache.get(message_id))
 
     return Response("OK")
 
+
 @api_view(["POST"])
-def receive(request):
+def send(request):
     print("receive")
     print(request.data)
 
     message = request.data["message"]
-
     message_id = request.data["time"]
+    send_time = request.data["time"]
+    username = request.data["user"]
 
     print("receive")
     print("message: " + message)
@@ -114,16 +140,9 @@ def receive(request):
     print("END")
 
     for i, segment in enumerate(segments):
-        print(f"Отправка сегмента №{i + 1}")
-        resp = requests.post('http://127.0.0.1:5000/Segments/Code/', json={
-            "segment": segment,
-            "total_segments": len(segments),
-            "message_id": message_id,
-            "send_time": request.data["time"],
-            "username": request.data["user"]
-        })
+        print(f"Отправка сегмента в кафку №{i + 1}")
+        sendKafka(segment, message_id)
 
-        print(resp.status_code)
-        print(resp.reason)
+    threading.Thread(target=assembling, args=[message_id, len(segments), send_time, username]).start()
 
     return Response("OK")
